@@ -186,6 +186,33 @@ TArray<uint8> AChatActor::ReceiveData()
     return ReceivedData;
 }
 
+FString AChatActor::ReceiveDataString()
+{
+    FString ResultMessage = "";
+    TArray<uint8> ReceivedData;
+    if (!ClientSocket || ClientSocket->GetConnectionState() != SCS_Connected)
+    {
+        return "";
+    }
+
+    uint32 Size;
+    while (ClientSocket->HasPendingData(Size))
+    {
+        ReceivedData.SetNumUninitialized(Size);
+        int32 BytesRead = 0;
+        ClientSocket->Recv(ReceivedData.GetData(), ReceivedData.Num(), BytesRead);
+        ReceivedData.SetNum(BytesRead); // Adjust size to actual bytes read
+
+        FUTF8ToTCHAR Converter((const ANSICHAR*)ReceivedData.GetData(), BytesRead);
+        FString Message(Converter.Get(), Converter.Length());
+        UE_LOG(LogTemp, Log, TEXT("📩 %s"), *Message);
+
+        ResultMessage = *Message;
+    }
+
+    return ResultMessage;
+}
+
 void AChatActor::Disconnect()
 {
     if (ClientSocket)

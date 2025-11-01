@@ -48,6 +48,10 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Socket")
     TArray<uint8> ReceiveData();
 
+    // Receives data from the socket
+    UFUNCTION(BlueprintCallable, Category = "Socket")
+    FString ReceiveDataString();
+
     // Disconnects the socket
     UFUNCTION(BlueprintCallable, Category = "Socket")
     void Disconnect();
