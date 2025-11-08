@@ -166,6 +166,29 @@ bool AChatActor::SendDataString(FString DataToSend) {
 
 }
 
+bool AChatActor::SendDataUserMessage(FString user, FString DataToSend)
+{
+    FString Message = user + ": " + DataToSend;
+
+    // Converte para bytes UTF-8
+    FTCHARToUTF8 Converter(*Message);
+    TArray<uint8> ByteArray;
+    ByteArray.Append((uint8*)Converter.Get(), Converter.Length());
+
+    // Envia via socket
+    int32 BytesSent = 0;
+    if (ClientSocket->Send(ByteArray.GetData(), ByteArray.Num(), BytesSent))
+    {
+        UE_LOG(LogTemp, Log, TEXT("Mensagem enviada: %s (%d bytes)"), *Message, BytesSent);
+        return true;
+    }
+    else
+    {
+        UE_LOG(LogTemp, Error, TEXT("Falha ao enviar mensagem"));
+        return false;
+    }
+}
+
 TArray<uint8> AChatActor::ReceiveData()
 {
     TArray<uint8> ReceivedData;
@@ -181,6 +204,9 @@ TArray<uint8> AChatActor::ReceiveData()
         int32 BytesRead = 0;
         ClientSocket->Recv(ReceivedData.GetData(), ReceivedData.Num(), BytesRead);
         ReceivedData.SetNum(BytesRead); // Adjust size to actual bytes read
+
+        FString Msg = FString(UTF8_TO_TCHAR((ReceivedData.GetData())));
+        OnMessageReceived.Broadcast(Msg);
     }
 
     return ReceivedData;

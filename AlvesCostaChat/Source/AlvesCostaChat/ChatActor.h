@@ -9,7 +9,15 @@
 //socket lib
 #include "UObject/NoExportTypes.h"
 #include "Networking.h" // Required for FSocket
+
+#include "CoreMinimal.h"
+#include "GameFramework/Actor.h"
+
 #include "ChatActor.generated.h"
+
+// Delegate para Blueprint
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSocketMessageReceived, const FString&, Message);
+
 
 UCLASS()
 class ALVESCOSTACHAT_API AChatActor : public AActor
@@ -44,17 +52,26 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Socket")
     bool SendDataString(FString DataToSend);
 
+    UFUNCTION(BlueprintCallable, Category = "Socket")
+    bool SendDataUserMessage(FString user, FString DataToSend);
+
     // Receives data from the socket
     UFUNCTION(BlueprintCallable, Category = "Socket")
     TArray<uint8> ReceiveData();
 
-    // Receives data from the socket
+    // Receives data from the socket with String
     UFUNCTION(BlueprintCallable, Category = "Socket")
     FString ReceiveDataString();
+
+    
 
     // Disconnects the socket
     UFUNCTION(BlueprintCallable, Category = "Socket")
     void Disconnect();
+
+    // Evento visível no Blueprint
+    UPROPERTY(BlueprintAssignable, Category = "Socket")
+    FOnSocketMessageReceived OnMessageReceived;
 
 protected:
     FSocket* ClientSocket;
