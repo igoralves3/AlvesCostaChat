@@ -62,6 +62,9 @@ public:
     // Receives data from the socket with String
     UFUNCTION(BlueprintCallable, Category = "Socket")
     FString ReceiveDataString();
+   
+    UFUNCTION(blueprintCallable, Category = "Socket")
+    bool SendResurge(FString DataToSend,bool Private, FString NameUser,FString lobbyName);
 
     
 

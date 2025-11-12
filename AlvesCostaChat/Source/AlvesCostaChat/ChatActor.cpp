@@ -188,7 +188,6 @@ bool AChatActor::SendDataUserMessage(FString user, FString DataToSend)
         return false;
     }
 }
-
 TArray<uint8> AChatActor::ReceiveData()
 {
     TArray<uint8> ReceivedData;
@@ -237,6 +236,38 @@ FString AChatActor::ReceiveDataString()
     }
 
     return ResultMessage;
+}
+
+bool AChatActor::SendResurge(FString DataToSend, bool Private, FString NameUser, FString lobbyName)
+{
+    FString stringPrivate;
+        if (Private)
+        {
+            stringPrivate = "S";
+        }
+        else
+        {
+            stringPrivate = "N";
+        }
+        
+        FString Message = NameUser +" :"+DataToSend +":"+stringPrivate + " : " + lobbyName;
+        FTCHARToUTF8 Converter(*Message);
+        TArray<uint8> ByteArray;
+        ByteArray.Append((uint8*)Converter.Get(), Converter.Length());
+
+        // Envia via socket
+        int32 BytesSent = 0;
+        if (ClientSocket->Send(ByteArray.GetData(), ByteArray.Num(), BytesSent))
+        {
+            UE_LOG(LogTemp, Log, TEXT("Mensagem enviada: %s (%d bytes)"), *Message, BytesSent);
+            return true;
+        }
+        else
+        {
+            UE_LOG(LogTemp, Error, TEXT("Falha ao enviar mensagem"));
+            return false;
+        }
+    
 }
 
 void AChatActor::Disconnect()
